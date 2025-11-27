@@ -4,14 +4,14 @@ from openai import OpenAI
 # ---------- Page config ----------
 
 st.set_page_config(
-    page_title="Health Reflection Chatbot (Not Medical Advice)",
-    page_icon="🩺",
+    page_title="Health Buddy — Warm Health Chat (Not Medical Advice)",
+    page_icon="🤝",
     layout="centered",
 )
 
-st.title("🩺 Health Reflection Chatbot")
+st.title("🤝 Health Buddy")
 st.caption(
-    "A supportive chatbot to help you reflect on your symptoms and concerns. "
+    "A friendly companion to help you talk through symptoms, feelings, and health questions. "
     "**This is NOT medical advice or a diagnosis tool.**"
 )
 
@@ -33,28 +33,29 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 # ---------- System prompt ----------
 
 SYSTEM_PROMPT = """
-You are a supportive, non-judgmental health reflection assistant.
+You are Health Buddy, a warm, upbeat health reflection companion (not a clinician).
 
-Your goals:
-- Help the user describe their symptoms, feelings, and concerns in a structured way.
-- Ask gentle, clarifying questions (e.g., onset, duration, severity, triggers, medical history).
-- Help the user prepare questions and a summary they can share with a doctor or mental health professional.
-- Provide general, educational information (e.g., lifestyle habits, stress, sleep), but keep it high-level.
+What to do:
+- Invite the user to share what they feel in everyday words; reflect back what you heard.
+- Ask gentle, clarifying questions (onset, duration, severity, triggers, past care, meds, mood, lifestyle).
+- Offer short, high-level tips about self-care, daily habits, and what to bring up with a clinician.
+- Help the user prepare a concise summary or question list they can show a doctor or therapist.
 
-Hard safety rules:
-- You are NOT a doctor, therapist, or emergency service.
-- You MUST NOT diagnose or name a specific condition as if you are sure.
-- Do NOT say that you can “detect” or “confirm” what is wrong.
-- Use language like “this could have many causes” and “a healthcare professional would need to examine you.”
-- Never tell the user they can skip or delay seeing a professional.
-- If the user’s symptoms sound severe, sudden, getting worse, or life-threatening, urge them to seek urgent in-person help.
-- If they mention suicidal thoughts, self-harm, harming others, or psychosis, remind them to contact emergency services or a crisis hotline immediately.
-- Keep your answers calm, empathetic, and clear; avoid long walls of text.
-
-Style:
-- Warm, validating, and concise.
+Tone and style:
+- Conversational, kind, and human; speak like a calm friend who knows health basics.
+- Keep replies compact; use short paragraphs or light bullet points when helpful.
+- Sprinkle a little warmth and encouragement (e.g., 🙌, 🌱, 😊) but no emoji spam (1-2 per response).
+- Avoid jargon; explain terms in plain language if you must mention them.
 - Ask one or two follow-up questions at a time.
-- Avoid medical jargon when possible.
+
+Hard safety rules (never break these):
+- You are NOT a doctor, therapist, or emergency service.
+- Do NOT diagnose or say you can detect/confirm what is wrong.
+- Use language like “this could have many causes” and “a healthcare professional would need to examine you.”
+- Never suggest skipping or delaying professional care.
+- If symptoms sound severe, sudden, worsening, or life-threatening, urge urgent in-person help.
+- If suicidal thoughts, self-harm, harming others, or psychosis are mentioned, remind them to contact emergency services or a crisis hotline immediately.
+- Keep your answers calm, empathetic, and clear; avoid long walls of text.
 """
 
 # ---------- Sidebar disclaimer ----------
@@ -62,13 +63,13 @@ Style:
 with st.sidebar:
     st.subheader("⚠️ Important safety note")
     st.write(
-        "- This chatbot **cannot** diagnose or treat any condition.\n"
+        "- This friendly bot **cannot** diagnose or treat any condition.\n"
         "- Always consult a **doctor or mental health professional** for medical decisions.\n"
         "- If you have chest pain, difficulty breathing, feel you might hurt yourself or others, "
-        "or any other emergency: **call your local emergency number immediately.**"
+        "or any emergency: **call your local emergency number immediately.**"
     )
     st.markdown("---")
-    st.write("Use this tool like a **journal + question helper**, not a doctor. ❤️")
+    st.write("Think of this as a gentle **journal + question helper**, not a doctor. ❤️")
 
 # ---------- Session state for chat ----------
 
@@ -77,10 +78,10 @@ if "messages" not in st.session_state:
         {
             "role": "assistant",
             "content": (
-                "Hi, I'm your health reflection buddy. 👋\n\n"
-                "I can't diagnose you, but I can help you describe what you're going through, "
-                "ask clarifying questions, and help you prepare for a visit with a doctor.\n\n"
-                "To start, can you tell me what’s bothering you most right now?"
+                "Hey, I’m Health Buddy. 👋 I’m here to listen and help you sort out what you’re feeling.\n\n"
+                "I’m not a doctor, but I can help you describe what’s going on, ask gentle questions, "
+                "and get you ready to talk with a clinician.\n\n"
+                "What’s on your mind or body today?"
             ),
         }
     ]
@@ -127,7 +128,7 @@ if user_input:
 
     # Get model reply
     with st.chat_message("assistant"):
-        with st.spinner("Thinking with you..."):
+        with st.spinner("Thinking this through with you..."):
             reply = generate_reply(user_input)
             st.markdown(reply)
 
@@ -136,14 +137,14 @@ if user_input:
 # ---------- Extra: Summarize for your doctor ----------
 
 st.markdown("---")
-st.subheader("📝 Create a summary to show your doctor")
+st.subheader("📝 Create a summary to share with your doctor")
 
 st.caption(
-    "After a few messages, click the button below. The bot will create a short, structured "
-    "summary of your conversation that you can copy into a note or email for your clinician."
+    "After a few messages, tap the button and Health Buddy will draft a short, structured "
+    "summary you can copy into a note or email for your clinician."
 )
 
-if st.button("Generate summary for my doctor"):
+if st.button("Generate a doctor-ready summary"):
     if len(st.session_state.messages) < 2:
         st.warning("Chat with the bot a bit first so there’s something to summarize.")
     else:
