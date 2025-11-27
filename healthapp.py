@@ -1,20 +1,7 @@
-
----
-
-## 3. `app.py`
-
-```python
-import os
-from dotenv import load_dotenv
-
 import streamlit as st
 from openai import OpenAI
 
-# ---------- Setup ----------
-
-load_dotenv()  # Load variables from .env if present
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# ---------- Page config ----------
 
 st.set_page_config(
     page_title="Health Reflection Chatbot (Not Medical Advice)",
@@ -28,16 +15,22 @@ st.caption(
     "**This is NOT medical advice or a diagnosis tool.**"
 )
 
-# Safety: stop if no API key
+# ---------- API key from Streamlit secrets ----------
+
+# Make sure you set OPENAI_API_KEY in Streamlit secrets
+OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY", None)
+
 if not OPENAI_API_KEY:
     st.error(
-        "No `OPENAI_API_KEY` found.\n\n"
-        "Create a `.env` file or set the environment variable before running:\n"
-        "`OPENAI_API_KEY=your_key_here`"
+        "No `OPENAI_API_KEY` found in Streamlit secrets.\n\n"
+        "Add it in `.streamlit/secrets.toml` locally or in the Streamlit Cloud dashboard:\n"
+        "`OPENAI_API_KEY = \"sk-...\"`"
     )
     st.stop()
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+# ---------- System prompt ----------
 
 SYSTEM_PROMPT = """
 You are a supportive, non-judgmental health reflection assistant.
@@ -80,7 +73,6 @@ with st.sidebar:
 # ---------- Session state for chat ----------
 
 if "messages" not in st.session_state:
-    # Store only user/assistant messages here (no system message)
     st.session_state.messages = [
         {
             "role": "assistant",
@@ -100,7 +92,6 @@ def generate_reply(user_message: str) -> str:
     Call the OpenAI Chat Completions API with conversation history + system prompt
     and return the assistant's reply text.
     """
-
     api_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
     # Add previous conversation
@@ -111,7 +102,7 @@ def generate_reply(user_message: str) -> str:
     api_messages.append({"role": "user", "content": user_message})
 
     completion = client.chat.completions.create(
-        model="gpt-4.1-mini",  # Change model here if you like
+        model="gpt-4.1-mini",  # You can change model here
         messages=api_messages,
         temperature=0.4,
     )
