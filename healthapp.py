@@ -1,6 +1,75 @@
 import streamlit as st
 from openai import OpenAI
 
+# ---------- Styling ----------
+
+CUSTOM_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
+:root {
+    --hb-bg: linear-gradient(135deg, #f7fbff 0%, #f4f2ff 100%);
+    --hb-card: #ffffff;
+    --hb-accent: #5b7cfa;
+    --hb-soft: #e7edff;
+    --hb-text: #1f2a44;
+}
+html, body, .stApp {
+    background: var(--hb-bg);
+    color: var(--hb-text);
+    font-family: 'Manrope', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+.main {
+    padding-top: 1rem;
+}
+section[data-testid="stSidebar"] {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(8px);
+    border-right: 1px solid #e6e8f0;
+}
+div[data-testid="stSidebarNav"] * {
+    color: var(--hb-text);
+}
+div.block-container {
+    padding-top: 1.5rem;
+}
+div[data-testid="stMarkdownContainer"] p {
+    font-size: 0.98rem;
+}
+div[data-testid="stChatMessage"] {
+    background: var(--hb-card);
+    border: 1px solid #e7ebf5;
+    border-radius: 14px;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 8px 24px rgba(46, 67, 152, 0.08);
+}
+div[data-testid="stChatMessage"]:nth-of-type(even) {
+    background: #f7f9ff;
+}
+.stChatMessage .stMarkdown {
+    font-size: 1rem;
+}
+.stTextInput > div > div input, .stTextArea textarea {
+    border-radius: 12px;
+    border: 1px solid #dbe3ff;
+}
+.stButton button {
+    background: var(--hb-accent);
+    color: #fff;
+    border-radius: 12px;
+    border: none;
+    padding: 0.6rem 1.1rem;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(91, 124, 250, 0.25);
+}
+.stButton button:hover {
+    background: #4968e9;
+}
+.stCaption, .stMarkdown small {
+    color: #4a5670;
+}
+</style>
+"""
+
 # ---------- Page config ----------
 
 st.set_page_config(
@@ -9,10 +78,11 @@ st.set_page_config(
     layout="centered",
 )
 
+st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+
 st.title("🤝 Health Buddy")
 st.caption(
-    "A friendly companion to help you talk through symptoms, feelings, and health questions. "
-    "**This is NOT medical advice or a diagnosis tool.**"
+    "Gentle health chat to reflect and prep for real care. **Not medical advice.**"
 )
 
 # ---------- API key from Streamlit secrets ----------
@@ -63,13 +133,12 @@ Hard safety rules (never break these):
 with st.sidebar:
     st.subheader("⚠️ Important safety note")
     st.write(
-        "- This friendly bot **cannot** diagnose or treat any condition.\n"
-        "- Always consult a **doctor or mental health professional** for medical decisions.\n"
-        "- If you have chest pain, difficulty breathing, feel you might hurt yourself or others, "
-        "or any emergency: **call your local emergency number immediately.**"
+        "- Friendly guide, **not** a doctor.\n"
+        "- Talk to a clinician for decisions.\n"
+        "- Emergencies: call your local emergency number."
     )
     st.markdown("---")
-    st.write("Think of this as a gentle **journal + question helper**, not a doctor. ❤️")
+    st.write("A gentle **journal + question helper**, not a diagnosis tool. ❤️")
 
 # ---------- Session state for chat ----------
 
@@ -78,10 +147,9 @@ if "messages" not in st.session_state:
         {
             "role": "assistant",
             "content": (
-                "Hey, I’m Health Buddy. 👋 I’m here to listen and help you sort out what you’re feeling.\n\n"
-                "I’m not a doctor, but I can help you describe what’s going on, ask gentle questions, "
-                "and get you ready to talk with a clinician.\n\n"
-                "What’s on your mind or body today?"
+                "Hey, I’m Health Buddy. 👋 Warm listener, not a doctor.\n\n"
+                "Tell me what’s going on, and I’ll help you capture it and prep for a clinician.\n\n"
+                "What’s bothering you most right now?"
             ),
         }
     ]
@@ -118,7 +186,7 @@ for message in st.session_state.messages:
 
 # ---------- Input box ----------
 
-user_input = st.chat_input("Tell me what’s going on with your health…")
+user_input = st.chat_input("Share what’s on your mind or body…")
 
 if user_input:
     # Show user message
@@ -137,14 +205,13 @@ if user_input:
 # ---------- Extra: Summarize for your doctor ----------
 
 st.markdown("---")
-st.subheader("📝 Create a summary to share with your doctor")
+st.subheader("📝 Quick summary for your doctor")
 
 st.caption(
-    "After a few messages, tap the button and Health Buddy will draft a short, structured "
-    "summary you can copy into a note or email for your clinician."
+    "Ready to share? I’ll draft a tight summary you can paste for your clinician."
 )
 
-if st.button("Generate a doctor-ready summary"):
+if st.button("Create summary"):
     if len(st.session_state.messages) < 2:
         st.warning("Chat with the bot a bit first so there’s something to summarize.")
     else:
